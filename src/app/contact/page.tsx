@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 import { getSettings } from '@/lib/sanity'
 import { contactLinks, e164 } from '@/lib/vcard'
 import { LOGO_PNG_B64 } from '@/lib/logoData'
+import { DEFAULT_ADDRESS_LINE } from '@/lib/site'
 export const revalidate = 300
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://houseofqg.com'
 export const metadata = { title: 'Contact card', description: 'Scan the QR code or tap Save to add House of QG to your phone contacts: phone, WhatsApp, email and social media.', alternates: { canonical: '/contact' } }
@@ -32,7 +33,7 @@ export default async function Contact() {
         <a href="/"><b>Website</b><span>houseofqg.com</span></a>
         {socials.map((l) => <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer"><b>{l.label}</b><span>Follow us</span></a>)}
       </div>
-      {s.address && <p className="caddr">{s.address}</p>}
+      <p className="caddr"><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.address || DEFAULT_ADDRESS_LINE)}`} target="_blank" rel="noopener noreferrer">{s.address || DEFAULT_ADDRESS_LINE}</a></p>
       {none && <p className="caddr">Add your phone, email and social links in Studio &gt; Site settings and they appear here.</p>}
     </div>
     <div className="qrbox">

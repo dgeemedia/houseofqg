@@ -1,4 +1,5 @@
 import { LOGO_PNG_B64 } from './logoData'
+import { DEFAULT_ADDRESS } from './site'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://houseofqg.com'
 /** 0803 123 4567 -> +2348031234567. Numbers already in +international form are kept. */
 export function e164(raw?: string) {
@@ -27,6 +28,7 @@ export function buildVCard(s: any, opts: { photo?: boolean } = {}) {
   if (wa && wa !== phone) L.push(`TEL;TYPE=CELL:${wa}`)
   if (s?.email) L.push(`EMAIL;TYPE=INTERNET,WORK:${esc(s.email)}`)
   if (s?.address) L.push(`ADR;TYPE=WORK:;;${esc(String(s.address))};;;;`)
+  else L.push(`ADR;TYPE=WORK:;;${esc(DEFAULT_ADDRESS.street)};${DEFAULT_ADDRESS.locality};${DEFAULT_ADDRESS.region};;${DEFAULT_ADDRESS.country}`)
   contactLinks(s).forEach((l, i) => { L.push(i === 0 ? `URL:${l.url}` : `item${i}.URL:${l.url}`); if (i > 0) L.push(`item${i}.X-ABLabel:${l.label}`) })
   L.push('NOTE:Clothing with a point of view. Fastest Finger drops and Black Friday sales at houseofqg.com.')
   if (opts.photo !== false) L.push(`PHOTO;ENCODING=b;TYPE=PNG:${LOGO_PNG_B64}`)

@@ -1,3 +1,4 @@
+import { subaccountFields } from '@/lib/flutterwave'
 import { NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { getSettings, writeClient } from '@/lib/sanity'
@@ -53,7 +54,7 @@ async function pay(b: any) {
     items: [{ _key: `${deal.p._id}-unit`, productId: deal.p._id, productName: deal.p.name, variant, mode: 'unit', quantity: 1, price: deal.dealPrice, units: 1 }] })
   await writeClient.patch(c._id).set({ orderId: `order-${ref}`, expiresAt: new Date(Date.now() + 15 * 6e4).toISOString() }).commit() // extra time to finish paying
   const res = await fetch('https://api.flutterwave.com/v3/payments', { method: 'POST', headers: { Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tx_ref: ref, amount: total, currency: 'NGN', redirect_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart?paid=1`, meta: { promo_code: code }, customer: { email: b.email, name: b.name, phonenumber: b.phone },
+    body: JSON.stringify({ ...subaccountFields('NGN'), tx_ref: ref, amount: total, currency: 'NGN', redirect_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart?paid=1`, meta: { promo_code: code }, customer: { email: b.email, name: b.name, phonenumber: b.phone },
       customizations: { title: 'House of QG', description: `Fastest Finger ${code}: ${deal.p.name}` } }) }).then((r) => r.json())
   if (!res?.data?.link) return bad('Could not start payment. Please try again.')
   return NextResponse.json({ link: res.data.link })

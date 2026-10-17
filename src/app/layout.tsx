@@ -10,6 +10,7 @@ import Analytics from '@/components/Analytics'
 import ChatWidget from '@/components/ChatWidget'
 import HeaderSearch from '@/components/HeaderSearch'
 import { LangProvider, T } from '@/lib/i18n'
+import { DEFAULT_ADDRESS, DEFAULT_ADDRESS_LINE } from '@/lib/site'
 const body = Manrope({ subsets: ['latin'], variable: '--font' })
 const display = Fraunces({ subsets: ['latin'], variable: '--display', style: ['normal', 'italic'], axes: ['opsz'] })
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://houseofqg.com'
@@ -25,7 +26,7 @@ export const metadata = {
 }
 export const viewport = { themeColor: '#f5efe6' }
 export const revalidate = 60
-const orgLd = { '@context': 'https://schema.org', '@graph': [{ '@type': 'Organization', name: 'House of QG', url: SITE, logo: `${SITE}/icon-512.png` }, { '@type': 'WebSite', name: 'House of QG', url: SITE }] }
+const orgLd = { '@context': 'https://schema.org', '@graph': [{ '@type': 'Organization', name: 'House of QG', url: SITE, logo: `${SITE}/icon-512.png`, address: { '@type': 'PostalAddress', streetAddress: DEFAULT_ADDRESS.street, addressLocality: DEFAULT_ADDRESS.locality, addressRegion: DEFAULT_ADDRESS.region, addressCountry: 'NG' } }, { '@type': 'WebSite', name: 'House of QG', url: SITE }] }
 export default async function Root({ children }: { children: React.ReactNode }) {
   const [s, promo] = await Promise.all([getSettings().then((x) => x || {}), getActivePromo().catch(() => null)])
   /** While a sale titled or badged "Black Friday" is live, the whole store switches to its black-and-gold theme. */
@@ -54,10 +55,10 @@ export default async function Root({ children }: { children: React.ReactNode }) 
         <div className="fgrid">
           <div><Link href="/" className="doorway" aria-label="House of QG"><img src="/logo-gold.png" alt="House of QG" width={190} height={84} /></Link><div className="fqt">Fashion <i>•</i> Style <i>•</i> You</div><p style={{ marginTop: 14 }}><T k="f.tag" /></p></div>
           <div><h4><T k="f.shop" /></h4><Link href="/#shop"><T k="f.all" /></Link><Link href="/#drop"><T k="nav.drops" /></Link><Link href="/size-guide"><T k="f.size" /></Link><Link href="/track"><T k="f.track" /></Link><Link href="/cart"><T k="f.cart" /></Link><Link href="/account"><T k="f.account" /></Link><Link href="/contact"><T k="f.card" /></Link></div>
-          <div><h4><T k="f.contact" /></h4>{s.phone && <span>{s.phone}</span>}{s.email && <a href={`mailto:${s.email}`}>{s.email}</a>}{s.whatsappNumber && <a href={`https://wa.me/${s.whatsappNumber}`}><T k="f.whatsapp" /></a>}{s.address && <span>{s.address}</span>}<Link href="/contact" className="fcard"><T k="f.cardCta" /></Link>{socials.length > 0 && <><h4 style={{ marginTop: 18 }}><T k="f.follow" /></h4><div className="social">{socials.map(([l, u]) => <a key={l} href={u} target="_blank" rel="noopener noreferrer">{l}</a>)}</div></>}</div>
+          <div><h4><T k="f.contact" /></h4>{s.phone && <span>{s.phone}</span>}{s.email && <a href={`mailto:${s.email}`}>{s.email}</a>}{s.whatsappNumber && <a href={`https://wa.me/${s.whatsappNumber}`}><T k="f.whatsapp" /></a>}<span>{s.address || DEFAULT_ADDRESS_LINE}</span><Link href="/contact" className="fcard"><T k="f.cardCta" /></Link>{socials.length > 0 && <><h4 style={{ marginTop: 18 }}><T k="f.follow" /></h4><div className="social">{socials.map(([l, u]) => <a key={l} href={u} target="_blank" rel="noopener noreferrer">{l}</a>)}</div></>}</div>
           <div><h4><T k="f.why" /></h4><span><T k="f.why1" /></span><span><T k="f.why2" /></span><span><T k="f.why3" /></span><span><T k="f.why4" /></span></div>
         </div>
-        <div className="fbase">© {Math.max(2026, new Date().getFullYear())} House of QG{s.cacNumber ? ` · RC ${s.cacNumber}` : ''} · <T k="f.rights" /> · <Link href="/legal/terms"><T k="f.terms" /></Link> · <Link href="/legal/privacy"><T k="f.privacy" /></Link> · <Link href="/legal/returns"><T k="f.returns" /></Link></div>
+        <div className="fbase"><span>© {Math.max(2026, new Date().getFullYear())} House of QG{s.cacNumber ? ` · RC ${s.cacNumber}` : ''} · <T k="f.rights" /> · <Link href="/legal/terms"><T k="f.terms" /></Link> · <Link href="/legal/privacy"><T k="f.privacy" /></Link> · <Link href="/legal/returns"><T k="f.returns" /></Link></span><span className="credit">Powered by <b>Elorge Technologies Limited</b></span></div>
       </div></footer>
     </LangProvider></CartProvider></body></html>
   )

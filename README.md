@@ -22,6 +22,9 @@ Built with Next.js 15, Sanity (admin at `/studio`), and Flutterwave payments.
 6. In Sanity > API > CORS add your site URL. Add the Sanity webhook and Flutterwave webhook as in `.env.example` comments (webhook URL: `https://houseofqg.com/api/webhook`).
 7. Deploy to Vercel, add the same env vars, point `houseofqg.com` at it.
 
+## Payments go to the House of QG subaccount
+In Flutterwave > Settings > Subaccounts, add House of QG (its bank account), copy the subaccount ID (`RS_…`) into `FLUTTERWAVE_SUBACCOUNT_ID`. Both normal checkout and Fastest Finger payments then settle to it (naira payments). Leave it empty to settle to the main Flutterwave account.
+
 ## Running a Fastest Finger drop
 Studio > ⚡ Fastest Finger drops > new: pick the piece, drop price, pieces available, start and end time, hold minutes. It appears on the home page when it starts.
 

@@ -1,3 +1,4 @@
+import { subaccountFields } from '@/lib/flutterwave'
 import { NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { priceCart } from '@/lib/pricing'
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
     })
     const res = await fetch('https://api.flutterwave.com/v3/payments', {
       method: 'POST', headers: { Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tx_ref: ref, amount: payAmount, currency: payCurrency, redirect_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart?paid=1`,
+      body: JSON.stringify({ ...subaccountFields(payCurrency), tx_ref: ref, amount: payAmount, currency: payCurrency, redirect_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart?paid=1`,
         customer: { email: b.email, name: b.name, phonenumber: b.phone }, customizations: { title: 'House of QG', description: cp ? `Order ${ref} (code ${cp.code})` : `Order ${ref}` } }),
     }).then((r) => r.json())
     if (!res?.data?.link) throw new Error('Could not start payment. Please try again.')
