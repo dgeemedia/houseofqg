@@ -1,0 +1,32 @@
+{
+ "name": "houseofqg",
+ "private": true,
+ "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "import": "node scripts/import.mjs"
+ },
+ "dependencies": {
+  "@portabletext/react": "^3.1.0",
+  "@sanity/client": "^7.27.0",
+  "@sanity/image-url": "^1.0.2",
+  "@sanity/vision": "^3.60.0",
+  "next": "^15.0.0",
+  "next-auth": "^5.0.0-beta.25",
+  "next-sanity": "^9.8.0",
+  "pdf-lib": "^1.17.1",
+  "qrcode": "^1.5.4",
+  "react": "^19.0.0",
+  "react-dom": "^19.0.0",
+  "sanity": "^3.60.0",
+  "styled-components": "^6.1.0"
+ },
+ "devDependencies": {
+  "@types/node": "^22",
+  "@types/qrcode": "^1.5.5",
+  "@types/react": "^19",
+  "@types/react-dom": "^19",
+  "typescript": "^5"
+ }
+}

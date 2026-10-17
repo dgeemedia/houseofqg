@@ -1,0 +1,3 @@
+name,category,short_description,full_description,unit_price,volume_tiers,dispatch_time,weight_kg,stock,options,specs,images,featured,new_in,fit_note,active
+EXAMPLE Aurelia Satin Slip Dress,Dresses,Bias-cut satin slip dress with adjustable straps.,"Paragraph one about the piece.
+Paragraph two: fabric, lining and care.",38000,2:35000,Ships in 2-3 days,0.6,40,Size=XS|S|M|L|XL;Colour=Wine|Black,Fabric=Satin;Lining=Yes;Care=Hand wash cold,example-dress-1.jpg;example-dress-2.jpg,yes,yes,"Runs true to size. Model is 5'8"" wearing S.",yes
