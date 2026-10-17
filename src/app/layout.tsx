@@ -31,7 +31,7 @@ export default async function Root({ children }: { children: React.ReactNode }) 
   const [s, promo] = await Promise.all([getSettings().then((x) => x || {}), getActivePromo().catch(() => null)])
   /** While a sale titled or badged "Black Friday" is live, the whole store switches to its black-and-gold theme. */
   const bf = /black\s*friday/i.test(`${promo?.badge || ''} ${promo?.title || ''}`)
-  const socials: [string, string][] = ([['Instagram', s.instagramUrl], ['TikTok', s.tiktokUrl], ['Facebook', s.facebookUrl], ['X', s.xUrl], ['YouTube', s.youtubeUrl], ['Telegram', s.telegramUrl], ['WhatsApp', s.whatsappNumber && `https://wa.me/${s.whatsappNumber}`]] as [string, string][]).filter(([, u]) => u)
+  const socials: [string, string][] = ([['Instagram', s.instagramUrl], ['TikTok', s.tiktokUrl], ['Facebook', s.facebookUrl], ['X', s.xUrl], ['YouTube', s.youtubeUrl], ['LinkedIn', s.linkedinUrl], ['Snapchat', s.snapchatUrl], ['Pinterest', s.pinterestUrl], ['Threads', s.threadsUrl], ['Telegram', s.telegramUrl], ['WhatsApp', s.whatsappNumber && `https://wa.me/${s.whatsappNumber}`]] as [string, string][]).filter(([, u]) => u)
   const org = { ...orgLd['@graph'][0], sameAs: socials.filter(([l]) => l !== 'WhatsApp').map(([, u]) => u), ...(s.phone || s.email ? { contactPoint: [{ '@type': 'ContactPoint', contactType: 'customer service', areaServed: 'NG', availableLanguage: 'en', ...(s.phone ? { telephone: s.phone } : {}), ...(s.email ? { email: s.email } : {}) }] } : {}) }
   const site = { ...orgLd['@graph'][1], potentialAction: { '@type': 'SearchAction', target: `${SITE}/?q={search_term_string}`, 'query-input': 'required name=search_term_string' } }
   const ld = { ...orgLd, '@graph': [org, site] }

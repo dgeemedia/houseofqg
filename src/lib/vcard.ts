@@ -18,7 +18,7 @@ export type ContactLink = { label: string; url: string }
 /** Every link the card carries, in display order. Empty settings fields are skipped. */
 export function contactLinks(s: any): ContactLink[] {
   const wa = (s?.whatsappNumber || '').replace(/\D/g, '')
-  return ([['Website', SITE], ['Instagram', s?.instagramUrl], ['TikTok', s?.tiktokUrl], ['Facebook', s?.facebookUrl], ['X', s?.xUrl], ['YouTube', s?.youtubeUrl], ['Telegram', s?.telegramUrl], ['WhatsApp', wa && `https://wa.me/${wa}`]] as [string, string][])
+  return ([['Website', SITE], ['Instagram', s?.instagramUrl], ['TikTok', s?.tiktokUrl], ['Facebook', s?.facebookUrl], ['X', s?.xUrl], ['YouTube', s?.youtubeUrl], ['LinkedIn', s?.linkedinUrl], ['Snapchat', s?.snapchatUrl], ['Pinterest', s?.pinterestUrl], ['Threads', s?.threadsUrl], ['Telegram', s?.telegramUrl], ['WhatsApp', wa && `https://wa.me/${wa}`]] as [string, string][])
     .filter(([, u]) => u).map(([label, url]) => ({ label, url }))
 }
 export function buildVCard(s: any, opts: { photo?: boolean } = {}) {
