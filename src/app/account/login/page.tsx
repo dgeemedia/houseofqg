@@ -5,8 +5,9 @@ import { T } from '@/lib/i18n'
 import LoginForm from '@/components/LoginForm'
 export const metadata = { title: 'Sign in', robots: { index: false, follow: false } }
 export const dynamic = 'force-dynamic'
-export default async function Login() {
+export default async function Login({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams
   if ((await auth())?.user?.email) redirect('/account')
   const f = await getFeatures()
-  return <div className="wrap" style={{ padding: '30px 20px' }}><h1><T k="lo.title" /></h1><p style={{ color: 'var(--mute)' }}><T k="lo.sub" /></p><LoginForm google={!!process.env.AUTH_GOOGLE_ID} facebook={!!process.env.AUTH_FACEBOOK_ID} phoneOn={f.phoneLogin} /></div>
+  return <div className="wrap" style={{ padding: '30px 20px' }}><h1><T k="lo.title" /></h1><p style={{ color: 'var(--mute)' }}><T k="lo.sub" /></p><LoginForm google={!!process.env.AUTH_GOOGLE_ID} facebook={!!process.env.AUTH_FACEBOOK_ID} phoneOn={f.phoneLogin} error={error} /></div>
 }

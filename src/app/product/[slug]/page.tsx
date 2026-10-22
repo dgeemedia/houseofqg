@@ -14,7 +14,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!p) return {}
   const title = `${p.name}${p.category ? ' · ' + p.category : ''}`
   const description = (p.description || `Shop ${p.name} from House of QG. Delivery across Nigeria.`).slice(0, 155)
-  return { title, description, alternates: { canonical: `/product/${slug}` }, openGraph: { title, description, images: [urlFor(p.images[0]).width(1200).height(630).url()] } }
+  const img = p.images?.[0] ? urlFor(p.images[0]).width(1200).height(630).url() : '/og.png'
+  return { title, description, alternates: { canonical: `/product/${slug}` }, openGraph: { type: 'website', siteName: 'House of QG', locale: 'en_NG', url: `/product/${slug}`, title, description, images: [{ url: img, width: 1200, height: 630, alt: p.name }] }, twitter: { card: 'summary_large_image', title, description, images: [img] } }
 }
 export default async function Product({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -24,10 +25,12 @@ export default async function Product({ params }: { params: Promise<{ slug: stri
   const [reviews, relatedRaw] = await Promise.all([getReviews(p._id), getRelated(p.category, p._id)])
   const related = withPromo(relatedRaw, promo)
   const avg = reviews.length ? reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviews.length : 0
-  const imgs = p.images.map((i: any) => ({ big: urlFor(i).width(900).url(), thumb: urlFor(i).width(120).height(120).url() }))
+  const imgs = (p.images || []).map((i: any) => ({ big: urlFor(i).width(900).url(), thumb: urlFor(i).width(120).height(120).url() }))
   const ld = { '@context': 'https://schema.org', '@type': 'Product', sku: slug, url: `${SITE}/product/${slug}`, name: p.name, image: imgs.map((i: any) => i.big), description: p.description, category: p.category, brand: { '@type': 'Brand', name: 'House of QG' },
     ...(reviews.length ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: avg.toFixed(1), reviewCount: reviews.length } } : {}),
-    offers: { '@type': 'Offer', url: `${SITE}/product/${slug}`, priceCurrency: 'NGN', price: p.promoUnitPrice ?? p.unitPrice, availability: p.stockUnits === 0 ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock' } }
+    offers: { '@type': 'Offer', url: `${SITE}/product/${slug}`, priceCurrency: 'NGN', price: p.promoUnitPrice ?? p.unitPrice, itemCondition: 'https://schema.org/NewCondition', availability: p.stockUnits === 0 ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock', seller: { '@type': 'Organization', name: 'House of QG' },
+      shippingDetails: { '@type': 'OfferShippingDetails', shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'NG' } },
+      hasMerchantReturnPolicy: { '@type': 'MerchantReturnPolicy', applicableCountry: 'NG', url: `${SITE}/legal/returns` } } }
   const crumbs = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ name: 'Home', url: SITE }, ...(p.category ? [{ name: p.category, url: `${SITE}/?q=${encodeURIComponent(p.category)}` }] : []), { name: p.name, url: `${SITE}/product/${slug}` }].map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.url })) }
   return (<>
     <div className="wrap pdp">
@@ -37,7 +40,7 @@ export default async function Product({ params }: { params: Promise<{ slug: stri
       <div><small style={{ letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 700 }}>{p.category}</small><h1 style={{ margin: '8px 0 10px' }}><L en={p.name} zh={p.nameZh} fr={p.nameFr} /></h1>
         {!!reviews.length && <div style={{ color: 'var(--gold)', marginBottom: 6 }}>{'★'.repeat(Math.round(avg))}{'☆'.repeat(5 - Math.round(avg))} <small style={{ color: 'var(--mute)' }}>{avg.toFixed(1)} ({reviews.length})</small></div>}
         <p style={{ color: 'var(--mute)' }}><L en={p.description} zh={p.descriptionZh} fr={p.descriptionFr} /></p>
-        <BuyBox p={p} image={urlFor(p.images[0]).width(120).height(120).url()} />
+        <BuyBox p={p} image={p.images?.[0] ? urlFor(p.images[0]).width(120).height(120).url() : ''} />
         <div style={{ marginTop: 14 }}><Share title={p.name} /></div></div>
     </div>
     <div className="wrap" style={{ maxWidth: 860 }}>

@@ -19,7 +19,9 @@ Built with Next.js 15, Sanity (admin at `/studio`), and Flutterwave payments.
 3. `cp .env.example .env.local` and fill it in (Sanity project id + editor token, Flutterwave secret key and webhook hash, site URL, email keys).
 4. `pnpm dev`, open `/studio`, and in **Site settings** add: announcement bar, hero title (use `*asterisks*` for the italic words), hero photo, contact details, social links, delivery fees, and **your own size chart**.
 5. Add pieces: name, category, photos (first two are used on cards), price, a **Size** option group (S, M, L…), optional Colour group, stock, fit note.
-6. In Sanity > API > CORS add your site URL. Add the Sanity webhook and Flutterwave webhook as in `.env.example` comments (webhook URL: `https://houseofqg.com/api/webhook`).
+6. In Sanity > API > CORS add your site URL. Then set up the two webhooks (they are different things, in different dashboards):
+   - **Sanity webhook** (sanity.io/manage > API > Webhooks): URL `https://houseofqg.com/api/order-updated?secret=<SANITY_WEBHOOK_SECRET>`, dataset `production`, trigger on **Update** only, filter `_type == "order"`, projection `{_id}`, method POST, drafts and versions off, Secret field empty. It sends shipped emails and handles cancellations.
+   - **Flutterwave webhook** (Flutterwave > Settings > Webhooks): URL `https://houseofqg.com/api/webhook`, secret hash equal to `FLUTTERWAVE_SECRET_HASH`. It marks orders paid.
 7. Deploy to Vercel, add the same env vars, point `houseofqg.com` at it.
 
 ## Payments go to the House of QG subaccount
@@ -36,3 +38,26 @@ Studio > ⚡ Fastest Finger drops > new: pick the piece, drop price, pieces avai
 - The logo is the owner's black script "House of QG" artwork, cut out with a transparent background: `public/logo-ink.png` (light pages), `logo-cream.png` (dark themes and Black Friday, swapped by CSS) and `logo-gold.png` (footer, contact card). `logo.png`, `icon-*.png`, `src/app/apple-icon.png`, `src/app/favicon.ico` use the big QG letters on bone; `public/og.png` is the link-preview image.
 - Policies in `src/lib/legal.ts` are drafts: confirm the return window and rules, and have them reviewed.
 - Sample size chart values are placeholders until you set your own in Studio.
+
+## Email: Resend first, Brevo as fallback
+`src/lib/mail.ts` sends through **Resend** (free 100/day). If Resend is out of quota or errors, the same email goes through **Brevo** (free 300/day) automatically. After Resend reports its daily quota is used, it is skipped until UTC midnight. In Brevo, verify the sender domain `houseofqg.com` (Senders, Domains & Dedicated IPs) and add the DNS records, or Brevo will reject mail from `orders@houseofqg.com`. Check Vercel logs for `[mail]` lines if anything fails.
+
+## Sign-in (Google, Facebook, email code)
+Customers match by email, so the same person gets the same account whichever method they use.
+- Google: Google Cloud > APIs & Services > Credentials > OAuth client (Web). Redirect URI: `https://houseofqg.com/api/auth/callback/google`. Set the consent screen to **In production**, or only test users can sign in.
+- Facebook: developers.facebook.com > Facebook Login. Valid OAuth redirect URI: `https://houseofqg.com/api/auth/callback/facebook`. Request the `email` permission and switch the app to **Live**.
+- Instagram has no usable public login for shoppers (Instagram Basic Display was shut down in Dec 2024, and the replacement only serves business/creator accounts and gives no email). Instagram visitors sign in with Facebook or an email code. Google is hidden automatically inside the Instagram/Facebook in-app browser because Google blocks it there.
+
+## Go-live checklist
+1. Vercel env vars: everything in `.env.example` (at minimum Sanity, Flutterwave, `NEXT_PUBLIC_SITE_URL=https://houseofqg.com`, `AUTH_SECRET`, `RESEND_API_KEY`, `BREVO_API_KEY`, `EMAIL_FROM`, `OWNER_EMAIL`). Redeploy after changing them.
+2. Domain: add `houseofqg.com` and `www` in Vercel; set `www` to redirect to the main domain.
+3. Sanity: add `https://houseofqg.com` to API > CORS (with credentials), add the product webhook.
+4. Flutterwave: webhook URL `https://houseofqg.com/api/webhook` with the same secret hash; do a small live payment test.
+5. Telegram live chat: register the webhook once with `https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://houseofqg.com/api/telegram&secret_token=<TELEGRAM_WEBHOOK_SECRET>`.
+6. SEO: in Google Search Console add the domain, paste the verification value into `GOOGLE_SITE_VERIFICATION`, then submit `https://houseofqg.com/sitemap.xml`. Do the same in Bing Webmaster Tools if wanted.
+7. Instagram/Facebook shopping: verify the domain in Meta Business Suite (`META_DOMAIN_VERIFICATION`), add `NEXT_PUBLIC_META_PIXEL_ID`, and use `https://houseofqg.com/feeds/products.xml` as the catalog feed.
+8. Studio > Site settings: fill in social links, phone, WhatsApp, size chart and hero. Replace the draft policies in `src/lib/legal.ts`.
+9. Test on a phone: sign in with each method (also from inside the Instagram app), place a real order, check the confirmation email arrives, and test the Brevo fallback by temporarily removing `RESEND_API_KEY`.
+
+## Sharing one Flutterwave account with other sites
+Flutterwave allows one webhook URL per account. This site's `/api/webhook` handles `qg_` payments and passes any other payment to the site that owns it, using `FLUTTERWAVE_FORWARDS` (`tx_refPrefix=https://site/webhook-path`, comma separated). Every site must use the same `FLUTTERWAVE_SECRET_HASH`, a unique tx_ref prefix, and its own subaccount.

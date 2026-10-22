@@ -20,13 +20,16 @@ export const metadata = {
   title: { default: 'House of QG | Fashion, Fastest Finger drops & Black Friday', template: '%s | House of QG' },
   description: DESC,
   keywords: ['House of QG', 'fashion brand Nigeria', 'women clothing Nigeria', 'dresses Lagos', 'two piece sets Nigeria', 'Black Friday fashion Nigeria', 'fastest finger sale', 'buy clothes online Nigeria'],
-  alternates: { canonical: '/' },
+  applicationName: 'House of QG',
+  formatDetection: { telephone: false },
+  // Search Console / Bing / Meta (Instagram & Facebook Shop) domain verification, filled from env vars.
+  verification: { google: process.env.GOOGLE_SITE_VERIFICATION, other: { ...(process.env.BING_SITE_VERIFICATION ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } : {}), ...(process.env.META_DOMAIN_VERIFICATION ? { 'facebook-domain-verification': process.env.META_DOMAIN_VERIFICATION } : {}) } },
   openGraph: { type: 'website', siteName: 'House of QG', locale: 'en_NG', url: SITE, title: 'House of QG', description: DESC, images: [{ url: '/og.png', width: 1200, height: 630, alt: 'House of QG: Fashion, Style, You' }] },
   twitter: { card: 'summary_large_image', title: 'House of QG', description: DESC, images: ['/og.png'] },
 }
 export const viewport = { themeColor: '#f5efe6' }
 export const revalidate = 60
-const orgLd = { '@context': 'https://schema.org', '@graph': [{ '@type': 'Organization', name: 'House of QG', url: SITE, logo: `${SITE}/icon-512.png`, address: { '@type': 'PostalAddress', streetAddress: DEFAULT_ADDRESS.street, addressLocality: DEFAULT_ADDRESS.locality, addressRegion: DEFAULT_ADDRESS.region, addressCountry: 'NG' } }, { '@type': 'WebSite', name: 'House of QG', url: SITE }] }
+const orgLd = { '@context': 'https://schema.org', '@graph': [{ '@type': ['Organization', 'OnlineStore'], name: 'House of QG', url: SITE, logo: `${SITE}/icon-512.png`, address: { '@type': 'PostalAddress', streetAddress: DEFAULT_ADDRESS.street, addressLocality: DEFAULT_ADDRESS.locality, addressRegion: DEFAULT_ADDRESS.region, addressCountry: 'NG' } }, { '@type': 'WebSite', name: 'House of QG', url: SITE }] }
 export default async function Root({ children }: { children: React.ReactNode }) {
   const [s, promo] = await Promise.all([getSettings().then((x) => x || {}), getActivePromo().catch(() => null)])
   /** While a sale titled or badged "Black Friday" is live, the whole store switches to its black-and-gold theme. */
@@ -38,7 +41,7 @@ export default async function Root({ children }: { children: React.ReactNode }) 
   /** The House of QG logo: ink on light pages, cream when the theme is dark (see globals.css). */
   const Mark = () => <span className="brandmark"><img className="lg-i" src="/logo-ink.png" width={132} height={58} alt="House of QG" /><img className="lg-c" src="/logo-cream.png" width={132} height={58} alt="House of QG" /></span>
   return (
-    <html lang="en"><body className={`${body.variable} ${display.variable}`} data-sale={bf ? 'bf' : undefined}><CartProvider><LangProvider>
+    <html lang="en-NG"><body className={`${body.variable} ${display.variable}`} data-sale={bf ? 'bf' : undefined}><CartProvider><LangProvider>
       <Intro url={s.introVideoUrl} />
       <Analytics />
       <ChatWidget />

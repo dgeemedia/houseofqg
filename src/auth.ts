@@ -31,9 +31,10 @@ providers.push(Credentials({ id: 'phone', name: 'Phone code', credentials: { pho
     await writeClient.delete(id)
     return { id: phone, email: phoneEmail(phone), name: phone }
   } }))
-if (process.env.AUTH_GOOGLE_ID) providers.push(Google)
-if (process.env.AUTH_FACEBOOK_ID) providers.push(Facebook)
+if (process.env.AUTH_GOOGLE_ID) providers.push(Google({ clientId: process.env.AUTH_GOOGLE_ID, clientSecret: process.env.AUTH_GOOGLE_SECRET }))
+// Facebook only returns an email if the person has one on the account and grants it; the signIn callback below rejects logins without one.
+if (process.env.AUTH_FACEBOOK_ID) providers.push(Facebook({ clientId: process.env.AUTH_FACEBOOK_ID, clientSecret: process.env.AUTH_FACEBOOK_SECRET }))
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers, session: { strategy: 'jwt', maxAge: 30 * 24 * 3600 }, pages: { signIn: '/account/login' }, trustHost: true,
+  providers, secret: process.env.AUTH_SECRET, session: { strategy: 'jwt', maxAge: 30 * 24 * 3600 }, pages: { signIn: '/account/login' }, trustHost: true,
   callbacks: { signIn: ({ user }) => !!user.email },
 })

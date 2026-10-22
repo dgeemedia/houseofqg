@@ -8,6 +8,7 @@ import Ticker from '@/components/Ticker'
 import Welcome from '@/components/Welcome'
 import LightningCard from '@/components/LightningCard'
 export const revalidate = 30
+export const metadata = { alternates: { canonical: '/' } }
 /** "Wear it like *you mean it.*" : text between asterisks is set in italic wine/gold. */
 const Headline = ({ text }: { text: string }) => <>{text.split('*').map((x, i) => (i % 2 ? <em key={i}>{x}</em> : x))}</>
 export default async function Home() {

@@ -4,10 +4,21 @@ import { sendOrderEmail } from '@/lib/email'
 import { notify } from '@/lib/notify'
 import { sendWhatsApp } from '@/lib/whatsapp'
 const ok = () => NextResponse.json({ ok: true })
+/** FLUTTERWAVE_FORWARDS="runserv_=https://runserv.org/api/webhook,store_=https://elorgestore.org/api/webhook". The first prefix that matches the payment's tx_ref wins.
+ *  The original body and verif-hash header are sent unchanged, so each site checks the same secret hash itself. Never throws, so Flutterwave always gets a 200. */
+async function forward(txRef: string, raw: string, req: NextRequest) {
+  if (req.headers.get('x-forwarded-by')) return // never forward twice (prevents loops)
+  const rule = (process.env.FLUTTERWAVE_FORWARDS || '').split(',').map((x) => x.trim()).filter(Boolean).map((x) => { const i = x.indexOf('='); return [x.slice(0, i).trim(), x.slice(i + 1).trim()] }).find(([pre, url]) => pre && /^https:\/\//.test(url) && txRef.startsWith(pre))
+  if (!rule) { console.warn('[webhook] no forward rule for tx_ref', txRef.slice(0, 12)); return }
+  const r = await fetch(rule[1], { method: 'POST', headers: { 'Content-Type': 'application/json', 'verif-hash': req.headers.get('verif-hash') || '', 'x-forwarded-by': 'houseofqg' }, body: raw, signal: AbortSignal.timeout(8000) }).catch((err) => { console.error('[webhook] forward failed', rule[1], err?.message); return null })
+  if (r && !r.ok) console.error('[webhook] forward got', r.status, rule[1])
+}
 export async function POST(req: NextRequest) {
   if (req.headers.get('verif-hash') !== process.env.FLUTTERWAVE_SECRET_HASH) return NextResponse.json({ error: 'bad signature' }, { status: 401 })
-  const e = await req.json(), d = e?.data
-  if (e?.event !== 'charge.completed' || d?.status !== 'successful' || !String(d?.tx_ref).startsWith('qg_')) return ok()
+  const raw = await req.text(), e = JSON.parse(raw || '{}'), d = e?.data
+  // One Flutterwave account = one webhook URL. Payments for the other companies' sites (different tx_ref prefix) are passed on to them.
+  if (!String(d?.tx_ref || '').startsWith('qg_')) { await forward(String(d?.tx_ref || ''), raw, req); return ok() }
+  if (e?.event !== 'charge.completed' || d?.status !== 'successful') return ok()
   const order: any = await writeClient.getDocument(`order-${d.tx_ref}`)
   if (!order || order.status !== 'pending') return ok() // retry-safe
   // Re-verify with Flutterwave; never trust the payload alone
